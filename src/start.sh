@@ -30,17 +30,24 @@ echo "worker-comfyui: Starting ComfyUI"
 # Allow operators to tweak verbosity; default is DEBUG.
 : "${COMFY_LOG_LEVEL:=DEBUG}"
 
+# Use the compatibility overlay when present so simplified mode can accept
+# images[] with 1-3 references while preserving the legacy handler API.
+HANDLER_PATH="/handler.py"
+if [ -f /handler_multi.py ]; then
+    HANDLER_PATH="/handler_multi.py"
+fi
+
 # Serve the API and don't shutdown the container
 if [ "$SERVE_API_LOCALLY" == "true" ]; then
     python -u /comfyui/main.py --disable-auto-launch --disable-metadata --listen --verbose "${COMFY_LOG_LEVEL}" --log-stdout &
     echo $! > /tmp/comfyui.pid
 
-    echo "worker-comfyui: Starting RunPod Handler"
-    python -u /handler.py --rp_serve_api --rp_api_host=0.0.0.0
+    echo "worker-comfyui: Starting RunPod Handler (${HANDLER_PATH})"
+    python -u "${HANDLER_PATH}" --rp_serve_api --rp_api_host=0.0.0.0
 else
     python -u /comfyui/main.py --disable-auto-launch --disable-metadata --verbose "${COMFY_LOG_LEVEL}" --log-stdout &
     echo $! > /tmp/comfyui.pid
 
-    echo "worker-comfyui: Starting RunPod Handler"
-    python -u /handler.py
+    echo "worker-comfyui: Starting RunPod Handler (${HANDLER_PATH})"
+    python -u "${HANDLER_PATH}"
 fi
