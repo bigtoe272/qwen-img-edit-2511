@@ -90,7 +90,7 @@ RUN chmod +x /usr/local/bin/check-models.sh
 # Go back to root for handler files
 WORKDIR /
 
-ADD src/start.sh handler.py test_input.json ./
+ADD src/start.sh handler.py handler_multi.py test_input.json ./
 RUN chmod +x /start.sh
 
 # Enable high-performance downloads from HuggingFace (hf_xet chunk-based parallel transfers).
